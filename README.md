@@ -15,7 +15,7 @@
 
 Easily attach <a href="https://github.com/bevyengine/bevy">bevy</a>'s Handles/Entities statically to types on startup and get them in any system, without using Resources.
 
-It's just a little less clutter, and a bit more descriptive: e.g. `Image::get_icon(Icon::Play)` would return a weak clone of the Handle set with `Image::set_icon(img_handle)`. The setter can only be used once! This is only useful if you're sure these Handles/Entities will never change (and are always available)! For a more general use case, see <a href="https://github.com/dekirisu/type_cell">type_cell</a>.
+It's just a little less clutter, and a bit more descriptive: e.g. `Image::get_icon()` would return a weak clone of the Handle set with `Image::set_icon(img_handle)`. The setter can only be used once! This is only useful if you're sure these Handles/Entities will never change (and are always available)! For a more general use case, see <a href="https://github.com/dekirisu/type_cell">type_cell</a>.
 
 ## Overview
 ```rust 
