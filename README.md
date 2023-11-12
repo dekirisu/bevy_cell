@@ -1,4 +1,7 @@
 <p align="center">
+    <img src="https://user-images.githubusercontent.com/78398528/282285927-6f6c28a4-7d52-46ab-b29d-1d43cbc96374.gif">
+</p>
+<p align="center">
     <a href="https://github.com/dekirisu/bevy_cell" style="position:relative">
         <img src="https://img.shields.io/badge/github-dekirisu/bevy_cell-ee6677">
     </a>
@@ -13,153 +16,82 @@
     </a>
 </p>
 
-Easily attach <a href="https://github.com/bevyengine/bevy">bevy</a>'s Handles/Entities statically to types on startup and get them in any system, without using Resources.
-
-It's just a little less clutter, and a bit more descriptive: e.g. `Image::get_icon()` would return a weak clone of the Handle set with `Image::set_icon(img_handle)`. The setter can only be used once! This is only useful if you're sure these Handles/Entities will never change (and are always available)! For a more general use case, see <a href="https://github.com/dekirisu/type_cell">type_cell</a>.
-
-## Overview
+🦊 Easily attach <a href="https://github.com/bevyengine/bevy">bevy</a>'s Handles/Entities statically to types <br>
+🐑 Get them in any system, without using Resources.<br>
+🦄 Basically just simplified <a href="https://github.com/dekirisu/type_cell">type_cell</a> for bevy!
+```toml
+[dependencies]
+# Should work for any bevy version, as long as Entity/Handles don't change
+bevy_cell = "0.12"
+```
 ```rust 
 use bevy_cell::*;
 // setup cells
-handle_cell!{Image: handle_a;}
-entity_cell!{entity_a}
+handles!{Image: cat, dog;}
+entities!{player}
 // on startup
-Image::set_handle_a(img_handle);
-Entity::set_entity_a(entity);
+Image::set_cat(img_handle);
+Entity::set_player(entity);
 // in any system
-Image::get_handle_a();
-Entity::get_entity_a();
+Image::cat();
+Entity::player();
 ```
-The macro also accepts multiple definitions at once:
+## Usage
+🐁 The macro also accepts multiple definitions at once. <br>
+🦎 Wrapping the names in parenthesis changes their type:
+* `getter`: `Handle<T>/Entity`
+    * getter() returns a weak_clone of the Handle / a reference o the Entity
+* `[getter]`: `Vec<Handle<T>/Entity>`
+    * getter(id) - see above
+    * getter_vec() - returns a mut reference to the Vec - use with care: read below!
+* `{getter:K}`: `HashMap<K,Handle<T>/Enitity>`
+    * getter(id) - see above
+    * getter_map() - returns a mut reference to the HashMap - use with care: read below!
 ```rust 
-handle_cell!{
-    Image: image_a, image_b, image_c;
+handles!{
+    Image: single_img, [vec_imgs], {hashmap_imgs:u32};
     Mesh: mesh_a, mesh_b;
 }
-handle_cell!{ @Vec
-    Image: image_vec_a, image_vec_b, image_vec_c;
-    Mesh: mesh_vec_a, mesh_vec_b;
+entities!{
+    entity_a, entity_b, [entities]
 }
-entity_cell!{
-    entity_a, entity_b, entity_c
-}
+Image::set_vec_imgs([Image::_]);
+let img = Image::vec_imgs(0);
 ```
-For Vec/HashMaps:
+🐕 You can change the type on which the values will be attached on by using `getter@Type`
 ```rust 
-handle_cell!{@Vec Image: numbers;}
-handle_cell!{@HashMap<K> Image: numbers_id;}
-entity_cell!{@Vec slots}
-entity_cell!{@HashMap<K> slots_id}
-// on startup
-Image::set_numbers(img_handle_vec);
-Image::set_numbers_id(img_handle_map);
-Entity::set_slots(entity_vec);
-Entity::set_slots_id(entity_map);
-// in any system
-Image::get_numbers(index);
-Image::get_numbers_id(key);
-Entity::get_slots(index);
-Entity::get_slots_id(key);
+handles!{
+    Image: single_img@Scene, [vec_imgs@Mesh], {hashmap_imgs@Scene:u32};
+    Mesh: mesh_a@Scene, mesh_b@Image;
+}
+entities!{
+    entity_a, entity_b, [entities]
+}
+Mesh::set_vec_imgs([Image::_]);
+let img = Mesh::vec_imgs(0);
 ```
-## Simple Example
-```rust
-use bevy_cell::*;
-use bevy::prelude::*;
+## Mutability
+🐝 Getting the mutable references to Vecs and HashMaps bypasses rusts safety!<br>
+🦞 Therefore it's important to be sure not to mutate them while it's read anywhere else<br>
+🦊 Here are 2 use cases in which controlling it is easy:
+* mutate/set on Startup
+* mutate/set on State Enter/Exits
 
-handle_cell!{Image: number;}
-entity_cell!{slot}
+🐍 Use bevy Resources for anything else!
+## Disclaimer
+🐢 I made this crate cause I disliked to have many resources as system parameters. <br>
+🦎 It's a bit hacky! Just use bevy Resources if you're not sure!<br>
+🐅 Use <a href="https://github.com/dekirisu/type_cell">type_cell</a> if you just dislike the way values are defined!
 
-fn startup (
-    mut cmd: Commands,
-    assets: Res<AssetServer>
-){
-    cmd.spawn(Camera2dBundle::default());
-    // set Handles/Entities once on startup
-    Image::set_number(assets.load("num_005.png"));
-    Entity::set_slot(cmd.spawn(SpriteBundle{
-        texture: assets.load("num_000.png"),
-        ..default()
-    }).id());
-}
-
-fn update (
-    mut timer: ResMut<ChangeTimer>,
-    time: Res<Time>,
-    mut qu: Query<&mut Handle<Image>>
-){
-    timer.0.tick(time.delta());
-    if timer.0.just_finished() {
-        // get Handles/Entities anywhere
-        *qu.get_mut(Entity::get_slot()).unwrap() = Image::get_number(); 
-    }
-}
-
-#[derive(Resource)]
-struct ChangeTimer(Timer);
-
-fn main () {
-    let mut app = App::new();
-    app
-    .add_plugins(DefaultPlugins)
-    .add_systems(Startup,startup)
-    .add_systems(Update,update)
-    .insert_resource(ChangeTimer(Timer::from_seconds(1.,TimerMode::Once)))
-    .run();
-}
-
-```
-## Example, using some experimental features
-In handle_cell:<br>
-@Vec: save a Vec of handles, instead of just one<br>
-#load: the setter will load multiple assets from the folder, which are numbered.<br>
-#random: include a getter, which returns a random Handle of this Vec.
-
-```rust
-use bevy_cell::*;
-use bevy::prelude::*;
-
-handle_cell!{@Vec #load #random Image: numbers;}
-entity_cell!{slot}
-
-fn startup (
-    mut cmd: Commands,
-    assets: Res<AssetServer>
-){
-    cmd.spawn(Camera2dBundle::default());
-    // loads num_000.png - num_009.png and attach it as Vec<Handle<Image>>
-    // into the Image type. Image::get_numbers(index) returns the Handle now.
-    Image::set_numbers((&assets,"num",0..=9,"png").into());
-    // Saves the spawned Entity into the Entity type. Entity::get_slot()
-    // returns this entity now anywhere.
-    Entity::set_slot(cmd.spawn(SpriteBundle{
-        texture: Image::get_numbers_random(),
-        ..default()
-    }).id());
-}
-
-fn update (
-    mut timer: ResMut<ChangeTimer>,
-    time: Res<Time>,
-    mut qu: Query<&mut Handle<Image>>
-){
-    timer.0.tick(time.delta());
-    if timer.0.just_finished() {
-        // Change the Handle<Image> of the Slot-Entities to a random number-image.
-        *qu.get_mut(Entity::get_slot()).unwrap() = Image::get_numbers_random(); 
-    }
-}
-
-#[derive(Resource)]
-struct ChangeTimer(Timer);
-
-fn main () {
-    let mut app = App::new();
-    app
-    .add_plugins(DefaultPlugins)
-    .add_systems(Startup,startup)
-    .add_systems(Update,update)
-    .insert_resource(ChangeTimer(Timer::from_seconds(1.,TimerMode::Repeating)))
-    .run();
-}
-
-```
+---
+### License
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+<br>
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>

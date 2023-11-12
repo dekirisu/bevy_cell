@@ -1,6 +1,6 @@
 [package]
 name = "bevy_cell"
-version = "0.11.1"
+version = "0.12.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
@@ -13,11 +13,8 @@ repository = "https://github.com/dekirisu/bevy_cell"
 documentation = "https://docs.rs/bevy_cell"
 
 [dependencies]
-type_cell = "0.1.0"
-intuple = "0.1.0"
-rand = "0.8.5"
-bevy = {version="0.11",default-features=false,features=["bevy_asset"]}
-derive-new = "0.5.9"
+type_cell = "0.2"
+intuple = "0.1"
 
 [dev-dependencies]
-bevy = "0.11"
+bevy = "0.12" 
