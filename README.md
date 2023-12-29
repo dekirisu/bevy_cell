@@ -18,71 +18,82 @@
 
 🦊 Easily attach <a href="https://github.com/bevyengine/bevy">bevy</a>'s Handles/Entities statically to types <br>
 🐑 Get them in any system, without using Resources.<br>
-🦄 Basically just simplified <a href="https://github.com/dekirisu/type_cell">type_cell</a> for bevy!
+🦄 See <a href="https://github.com/dekirisu/type_cell">type_cell</a> for any other use case!
+<br>
 ```toml
 [dependencies]
-# Should work for any bevy version, as long as Entity/Handles don't change
-bevy_cell = "0.12"
+bevy_cell = "0.13"
 ```
 ```rust 
 use bevy_cell::*;
-// setup cells
-handles!{Image: cat, dog;}
-entities!{player}
-// on startup
-Image::set_cat(img_handle);
-Entity::set_player(entity);
-// in any system
-Image::cat();
-Entity::player();
 ```
-## Usage
-🐁 The macro also accepts multiple definitions at once. <br>
-🦎 Wrapping the names in parenthesis changes their type:
-* `getter`: `Handle<T>/Entity`
-    * getter() returns a weak_clone of the Handle / a reference o the Entity
-* `[getter]`: `Vec<Handle<T>/Entity>`
-    * getter(id) - see above
-    * getter_vec() - returns a mut reference to the Vec - use with care: read below!
-* `{getter:K}`: `HashMap<K,Handle<T>/Enitity>`
-    * getter(id) - see above
-    * getter_map() - returns a mut reference to the HashMap - use with care: read below!
+---
+**<u>I.</u> There are 2 valid syntaxes:**<br>
+🐰 `{Type} [name1] [name2] [name3]`<br>
+🦝 `Type: [name1] [name2] [name3];`
+<br><br>
+**<u>II.</u> The syntax inside the `[]` will change the attached type:**<br>
+🐈 **Entity** - Just choose a name: `[camera]`<br>
+🦥 **Handle** - Its type separated by a `|`:  `[Image|cat]`<br>
+🐒 If no type is set, the parent type is used: `[|cat]`
+<br><br>
+**<u>III.</u> Setting the collection type is also done inside `[]`:**<br>
+🦄 **Single** - Using the syntax as in <u>**II.**</u><br>
+🐔 **Vec** - add a `<>` after the name: `[cameras<>]`<br>
+🐲 **HashMap** - add a `<KeyType>` after the name: `[cameras<usize>]`
+<br>
 ```rust 
-handles!{
-    Image: single_img, [vec_imgs], {hashmap_imgs:u32};
-    Mesh: mesh_a, mesh_b;
+// Macro Examples
+bycell! {
+    Camera: [main] [secondary];
+    AudioSource: [|hit] [|shots<>];
+    Player: [main] [Scene|models<u8>];
 }
-entities!{
-    entity_a, entity_b, [entities]
-}
-Image::set_vec_imgs([Image::_]);
-let img = Image::vec_imgs(0);
 ```
-🐕 You can change the type on which the values will be attached on by using `getter@Type`
+**<u>IV.</u> Setting Values:**<br>
+🐑 Use `Type::set_..(value)` **ONCE** on (pre-)startup<br>
+🦌 The value can be anything implementing its type!
 ```rust 
-handles!{
-    Image: single_img@Scene, [vec_imgs@Mesh], {hashmap_imgs@Scene:u32};
-    Mesh: mesh_a@Scene, mesh_b@Image;
-}
-entities!{
-    entity_a, entity_b, [entities]
-}
-Mesh::set_vec_imgs([Image::_]);
-let img = Mesh::vec_imgs(0);
+// Setter Examples
+Camera::set_main(commands.spawn(..).id());
+AudioSource::set_shots([
+    assets.load("shot0.ogg"),
+    assets.load("shot1.ogg"),
+    assets.load("shot3.ogg"),
+]);
+Player::set_models([
+    (5, assets.load("player5.glb")),
+    (7, assets.load("player7.glb")),
+]);
 ```
-## Mutability
-🐝 Getting the mutable references to Vecs and HashMaps bypasses rusts safety!<br>
-🦞 Therefore it's important to be sure not to mutate them while it's read anywhere else<br>
-🦊 Here are 2 use cases in which controlling it is easy:
-* mutate/set on Startup
-* mutate/set on State Enter/Exits
+**<u>V.</u> Getting Values:**<br>
+🐏 Different getters are provided, depending on the collection type!
+```rust 
+// Single Getter
+Camera::main();            // Cloned
+Camera::main_ref();        // Static Reference
+// Vec Getters
+AudioSource::shots(1);     // Cloned
+AudioSource::shots_ref(1); // Static Reference
+AudioSource::shots_vec();  // Static Reference to Vec
+// HashMap Getters
+Player::models(&5);        // Cloned
+Player::models_ref(&5);    // Static Reference
+Player::models_map();      // Static Reference to HashMap
+```
 
-🐍 Use bevy Resources for anything else!
-## Disclaimer
-🐢 I made this crate cause I disliked to have many resources as system parameters. <br>
-🦎 It's a bit hacky! Just use bevy Resources if you're not sure!<br>
-🐅 Use <a href="https://github.com/dekirisu/type_cell">type_cell</a> if you just dislike the way values are defined!
-
+**<u>VI.</u> Mutability:**<br>
+🐝 You can make any of those mutable by adding a `mut` before the name<br>
+🦞 Only use this if you can avoid race conditions<br>
+🦧 One idea is to mutate something on state change!
+```rust 
+// Macro Examples
+bycell! {
+    Camera: [mut main] [mut secondary];
+    AudioSource: [|mut hit] [|mut shots<>];
+    Player: [mut main] [Scene|mut models<u8>];
+}
+```
 ---
 ### License
 <sup>
