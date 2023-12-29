@@ -33,7 +33,7 @@ use bevy_cell::*;
 🐰 `{Type} [name1] [name2] [name3]`<br>
 🦝 `Type: [name1] [name2] [name3];`
 <br><br>
-<b>u>II.</u> The syntax inside the `[]` will change the attached type:</b><br>
+<b><u>II.</u> The syntax inside the `[]` will change the attached type:</b><br>
 🐈 **Entity** - Just choose a name: `[camera]`<br>
 🦥 **Handle** - Its type separated by a `|`:  `[Image|cat]`<br>
 🐒 If no type is set, the parent type is used: `[|cat]`
