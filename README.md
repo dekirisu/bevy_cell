@@ -28,16 +28,17 @@ bevy_cell = "0.13"
 use bevy_cell::*;
 ```
 ---
-**<u>I.</u> There are 2 valid syntaxes:**<br>
+
+<b><u>I.</u> There are 2 valid syntaxes:</b><br>
 🐰 `{Type} [name1] [name2] [name3]`<br>
 🦝 `Type: [name1] [name2] [name3];`
 <br><br>
-**<u>II.</u> The syntax inside the `[]` will change the attached type:**<br>
+<b>u>II.</u> The syntax inside the `[]` will change the attached type:</b><br>
 🐈 **Entity** - Just choose a name: `[camera]`<br>
 🦥 **Handle** - Its type separated by a `|`:  `[Image|cat]`<br>
 🐒 If no type is set, the parent type is used: `[|cat]`
 <br><br>
-**<u>III.</u> Setting the collection type is also done inside `[]`:**<br>
+<b><u>III.</u> Setting the collection type is also done inside `[]`:</b><br>
 🦄 **Single** - Using the syntax as in <u>**II.**</u><br>
 🐔 **Vec** - add a `<>` after the name: `[cameras<>]`<br>
 🐲 **HashMap** - add a `<KeyType>` after the name: `[cameras<usize>]`
@@ -50,7 +51,7 @@ bycell! {
     Player: [main] [Scene|models<u8>];
 }
 ```
-**<u>IV.</u> Setting Values:**<br>
+<b><u>IV.</u> Setting Values:</b><br>
 🐑 Use `Type::set_..(value)` **ONCE** on (pre-)startup<br>
 🦌 The value can be anything implementing its type!
 ```rust 
@@ -66,7 +67,7 @@ Player::set_models([
     (7, assets.load("player7.glb")),
 ]);
 ```
-**<u>V.</u> Getting Values:**<br>
+<b><u>V.</u> Getting Values:</b><br>
 🐏 Different getters are provided, depending on the collection type!
 ```rust 
 // Single Getter
@@ -82,7 +83,7 @@ Player::models_ref(&5);    // Static Reference
 Player::models_map();      // Static Reference to HashMap
 ```
 
-**<u>VI.</u> Mutability:**<br>
+<b><u>VI.</u> Mutability:</b><br>
 🐝 You can make any of those mutable by adding a `mut` before the name<br>
 🦞 Only use this if you can avoid race conditions<br>
 🦧 One idea is to mutate something on state change!
