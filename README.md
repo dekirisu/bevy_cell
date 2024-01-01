@@ -36,7 +36,8 @@ use bevy_cell::*;
 <b><u>II.</u> The syntax inside the `[]` will change the attached type:</b><br>
 🐈 **Entity** - Just choose a name: `[camera]`<br>
 🦥 **Handle** - Its type separated by a `|`:  `[Image|cat]`<br>
-🐒 If no type is set, the parent type is used: `[|cat]`
+🐹 **Raw** - Its type separated by a `:`:  `[Image:cat]`<br>
+🐒 If no type is set, the parent type is used: `[|cat]` `[:cat]`
 <br><br>
 <b><u>III.</u> Setting the collection type is also done inside `[]`:</b><br>
 🦄 **Single** - Using the syntax as in <u>**II.**</u><br>

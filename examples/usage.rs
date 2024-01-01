@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 bycell!{
     Entity: [single] [vec<>] [hashmap<u32>];
-    Image: [single_e];
+    Image: [single_e] [Mesh:raw];
     AudioSource: [Mesh|single];
     Mesh: [|single] [|vec<>] [|hashmap<u32>] [StandardMaterial|hashmap_mats<u32>] [map_e<&'static str>];
     StandardMaterial: [|single] [|vec<>] [|hashmap<u32>];
